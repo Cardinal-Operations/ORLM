@@ -1,0 +1,26 @@
+MODEL_PATH=$1
+NUM_GPUS=4
+
+TEST_DATASET_NAME="CardinalOperations/MAMO"
+TEST_DATASET_SPLIT="complex_lp"
+
+Q2MC_OUTPUT_DIR="results/MAMO.ComplexLP.q2mc_en.$MODEL_PATH"
+
+python -m eval.generate \
+    --model_name_or_path $MODEL_PATH \
+    --dataset_name $TEST_DATASET_NAME \
+    --dataset_split $TEST_DATASET_SPLIT \
+    --tensor_parallel_size $NUM_GPUS \
+    --save_dir $Q2MC_OUTPUT_DIR \
+    --topk 1 \
+    --decoding greedy \
+    --verbose
+
+python -m eval.execute \
+    --input_file $Q2MC_OUTPUT_DIR/generated.jsonl \
+    --output_file $Q2MC_OUTPUT_DIR/executed.jsonl \
+    --question_field en_question \
+    --answer_field en_answer \
+    --timeout 600 \
+    --max_workers 16 \
+    --verbose

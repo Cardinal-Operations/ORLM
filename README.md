@@ -74,7 +74,9 @@ python scripts/inference.py --model_name_or_path <path_to_local_orlm_directory> 
 
 ## Evaluation
 
-First, we prompt the ORLMs to generate a complete solution that includes both a mathematical model and a program (refer to `eval/generate.py`). We then extract this program and run it to obtain the predicted optimal value using parallel processing (see `eval/execute.py`, currently supporting only the COPT solver). We evaluate the accuracy by comparing the execution results with the ground truth optimal value. Note that variations in results may occur due to differences in computing resources, as executions are performed in parallel. Additionally, for hard examples like IndustryOR, where the number of variables may increase significantly, consider applying for [COPT web licenses](https://copt.shanshu.ai/license/home). Otherwise, execution may directly fail.
+First, we prompt the ORLMs to generate a complete solution that includes both a mathematical model and a program (refer to `eval/generate.py`). We then extract this program and run it to obtain the predicted optimal value using parallel processing (see `eval/execute.py`, currently supporting only the COPT solver). We evaluate the accuracy by comparing the execution results with the ground truth optimal value. 
+
+Note that variations in results may occur due to differences in computing resources, as executions are performed in parallel. Additionally, for hard examples like IndustryOR, where the number of variables may increase significantly, consider applying for [COPT web licenses](https://copt.shanshu.ai/license/home). Otherwise, execution may directly fail.
 
 Here's how to evaluate the ORLM models on various benchmarks:
 
@@ -82,10 +84,7 @@ Here's how to evaluate the ORLM models on various benchmarks:
 # (Optional) If you have trouble accessing the Hugging Face website, you can set an alternative endpoint:
 # export HF_ENDPOINT=https://hf-mirror.com
 cd ORLM
-sh scripts/eval.NL4OPT.sh <path_to_local_orlm_directory>
-sh scripts/eval.MAMO_EasyLP.sh <path_to_local_orlm_directory>
-sh scripts/eval.MAMO_ComplexLP.sh <path_to_local_orlm_directory>
-sh scripts/eval.IndustryOR.sh <path_to_local_orlm_directory>
+sh scripts/eval.all.sh <path_to_local_orlm_directory> <number_of_gpus>
 ```
 
 We also provide detailed completions and execution results in the `results` directory for the ORLM-LLaMA-3-8B model on the above benchmarks.

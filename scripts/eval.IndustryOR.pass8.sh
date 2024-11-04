@@ -1,10 +1,10 @@
 MODEL_PATH=$1
-NUM_GPUS=4
+NUM_GPUS=$2
 
-TEST_DATASET_NAME="CardinalOperations/NL4OPT"
+TEST_DATASET_NAME="CardinalOperations/IndustryOR"
 TEST_DATASET_SPLIT="test"
 
-Q2MC_OUTPUT_DIR="results/NL4OPT.q2mc_en.$MODEL_PATH"
+Q2MC_OUTPUT_DIR="$MODEL_PATH/eval.IndustryOR.pass8"
 
 python -m eval.generate \
     --model_name_or_path $MODEL_PATH \
@@ -12,8 +12,8 @@ python -m eval.generate \
     --dataset_split $TEST_DATASET_SPLIT \
     --tensor_parallel_size $NUM_GPUS \
     --save_dir $Q2MC_OUTPUT_DIR \
-    --topk 1 \
-    --decoding greedy \
+    --topk 8 \
+    --decoding sampling \
     --verbose
 
 python -m eval.execute \

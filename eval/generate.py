@@ -44,9 +44,10 @@ def main(args):
     print("init model done.")
     stop_tokens = ["</s>"]
     if args.decoding_method == "greedy":
-        sampling_params = SamplingParams(n=args.topk, temperature=0, top_p=1, max_tokens=model.llm_engine.model_config.max_model_len, stop=stop_tokens)
+        print(f"WARNING! greedy decoding will force temperature=0, top_p=1!")
+        sampling_params = SamplingParams(n=args.topk, temperature=0, top_p=1, max_tokens=model.llm_engine.model_config.max_model_len if args.max_tokens is None else args.max_tokens, stop=stop_tokens)
     elif args.decoding_method == "sampling":
-        sampling_params = SamplingParams(n=args.topk, temperature=0.7, top_p=0.95, max_tokens=model.llm_engine.model_config.max_model_len, stop=stop_tokens)
+        sampling_params = SamplingParams(n=args.topk, temperature=args.temperature, top_p=args.top_p, max_tokens=model.llm_engine.model_config.max_model_len if args.max_tokens is None else args.max_tokens, stop=stop_tokens)
     else:
         raise
     print(f"init sampling params done: {sampling_params}")
@@ -60,7 +61,7 @@ def main(args):
     # outputs = [prompt_to_output[prompt] if prompt in prompt_to_output else "" for prompt in prompts]
 
     save_file = os.path.join(args.save_dir, "generated.jsonl")
-    fw = open(save_file, "w")
+    fw = open(save_file, "w", encoding='utf-8')
     num_total = 0
     num_skip_for_dup = 0
     for example, prompt, generation in zip(sample, prompts, generations):
@@ -100,6 +101,9 @@ def parse_args():
     parser.add_argument("--save_dir", type=str, default=None)  
     parser.add_argument("--tensor_parallel_size", type=int, default=8)  # num_gpus
     parser.add_argument("--topk", type=int, default=1)  
+    parser.add_argument("--temperature", type=float, default=0.7) 
+    parser.add_argument("--top_p", type=float, default=0.95) 
+    parser.add_argument("--max_tokens", type=int, default=None) 
     parser.add_argument("--decoding_method", type=str, default="greedy")  
     parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()

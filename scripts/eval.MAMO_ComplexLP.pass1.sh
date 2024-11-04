@@ -1,10 +1,10 @@
 MODEL_PATH=$1
-NUM_GPUS=4
+NUM_GPUS=$2
 
-TEST_DATASET_NAME="CardinalOperations/IndustryOR"
-TEST_DATASET_SPLIT="test"
+TEST_DATASET_NAME="CardinalOperations/MAMO"
+TEST_DATASET_SPLIT="complex_lp"
 
-Q2MC_OUTPUT_DIR="results/IndustryOR.q2mc_en.$MODEL_PATH"
+Q2MC_OUTPUT_DIR="$MODEL_PATH/eval.MAMO_ComplexLP.pass1"
 
 python -m eval.generate \
     --model_name_or_path $MODEL_PATH \
@@ -22,5 +22,5 @@ python -m eval.execute \
     --question_field en_question \
     --answer_field en_answer \
     --timeout 600 \
-    --max_workers 1 \
+    --max_workers 16 \
     --verbose

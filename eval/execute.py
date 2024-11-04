@@ -5,7 +5,19 @@ import tempfile
 import concurrent.futures
 import argparse
 
+from collections import Counter
+
 ADD_SCRIPT = '\nif model.status == COPT.OPTIMAL:\n    print(f"Just print the best solution: {model.objval}")\nelse:\n    print("No Best Solution")'
+
+def majority_voting(pred_answers):
+    # Count occurrences of each item in the list
+    count = Counter(pred_answers)
+    # Find the answer with the maximum count
+    max_count = max(count.values())
+    # Extract all answers with the maximum count
+    possible_answers = [answer for answer, cnt in count.items() if cnt == max_count]
+    # Return the first answer with the maximum count
+    return possible_answers[0]
 
 def compile_script(script_content, timeout=300):
     # Ensure the target directory exists
@@ -119,16 +131,16 @@ def main(args):
         # print("-" * 10)
         # print(execution_output["execution_state"])
         example.update(execution_output)
-        return json.dumps(example)
+        return json.dumps(example, ensure_ascii=False)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_workers) as executor:
         # Submitting all the tasks to the executor
         future_to_example = {executor.submit(process_example, example): example for example in to_run}
 
         # Writing the results to file as they are completed
-        with open(args.output_file, "w") as fw:
+        with open(args.output_file, "w", encoding='utf-8') as fw:
             for example in early_failed:
-                dump = json.dumps(example)
+                dump = json.dumps(example, ensure_ascii=False)
                 fw.write(dump + "\n")
 
             for future in concurrent.futures.as_completed(future_to_example):
@@ -201,8 +213,66 @@ def main(args):
                 print("-" * 20 + "judge" + "-" * 20)
                 print(is_anyone_match)
         acc = sum(judges) / len(judges)
-        print(f"pass@{k}: {acc}")
+        metrics = {f"pass@{k}": acc}
 
+        if args.majority_voting:
+            mj_judges = []
+            for question, pred_answers in question2pred_answers.items():
+                k = len(pred_answers)
+
+                gt_answers = question2gt_answers[question]
+                assert len(set(gt_answers)) == 1
+                gt_answer = gt_answers[0]
+
+                pred_answers_t = []
+                for pred_answer in pred_answers:
+                    if pred_answer is None:
+                        continue
+                    try:
+                        pred_answer = round(float(pred_answer))
+                        pred_answers_t.append(pred_answer)
+                    except:
+                        pred_answers_t.append(pred_answer)
+                if pred_answers_t != []:
+                    mj_answer = majority_voting(pred_answers_t)
+                else:
+                    mj_answer = None
+
+                
+                is_mj_match=False
+                if gt_answer == "No Best Solution":
+                    if mj_answer is not None and mj_answer == gt_answer:
+                        is_mj_match = True
+                else:
+                    gt_answer = round(float(gt_answer))
+                    if mj_answer is not None and mj_answer != "No Best Solution":
+                        if gt_answer == 0:
+                            close_enough = abs(mj_answer) <= args.numerical_err_tolerance
+                        else:
+                            close_enough = abs((mj_answer - gt_answer) / gt_answer) <= args.numerical_err_tolerance
+                        if close_enough:
+                            is_mj_match = True
+                if args.verbose:
+                    print(f"gt_answer: {gt_answer}; pred_answers_t: {pred_answers_t}; mj_answer: {mj_answer}; is_mj_match: {is_mj_match}")
+                
+                if is_mj_match:
+                    mj_judges.append(1)
+                else:
+                    mj_judges.append(0)
+
+            mj_acc = sum(mj_judges) / len(mj_judges)
+            metrics[f"mj@{k}"] = mj_acc
+
+        if args.output_file.endswith(".json"):
+            metrics_file = args.output_file.replace(".json", ".metrics.json")
+        elif args.output_file.endswith(".jsonl"):
+            metrics_file = args.output_file.replace(".jsonl", ".metrics.json")
+        else:
+            metrics_file = args.output_file + ".metrics.json"
+        with open(metrics_file, "w") as fw:
+            dump = json.dumps(metrics, indent=4)
+            fw.write(dump)
+            print(dump)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -211,6 +281,7 @@ def parse_args():
     parser.add_argument("--timeout", type=int, default=600) 
     parser.add_argument("--max_workers", type=int, default=16)
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--majority_voting", action="store_true")
     parser.add_argument("--question_field", type=str, default=None)
     parser.add_argument("--answer_field", type=str, default=None) 
     parser.add_argument("--numerical_err_tolerance", type=float, default=0.05)

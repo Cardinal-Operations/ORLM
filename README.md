@@ -89,6 +89,51 @@ sh scripts/eval.all.sh <path_to_local_orlm_directory> <number_of_gpus>
 
 We also provide detailed completions and execution results in the `results` directory for the ORLM-LLaMA-3-8B model on the above benchmarks.
 
+## Training
+
+We also provide a training recipe that fine-tunes ORLM models using DeepSpeed and multi-GPU parallelization.
+
+```bash
+MODEL_NAME_OR_PATH=<path_to_your_base_model>
+DATA_PATH=<path_to_your_data_file_in_jsonl_format>
+SAVE_PATH=<save_model_output>
+
+NUM_GPUS=<num_gpus>
+BATCH_SIZE_PER_GPU=1
+TOTAL_BATCH_SIZE=<batch_size>
+PREPROCESSING_NUM_WORKERS=0
+GRADIENT_ACC_STEPS=$(($TOTAL_BATCH_SIZE/$NUM_GPUS/$BATCH_SIZE_PER_GPU))
+MAX_SEQ_LENGTH=8192
+LEARNING_RATE=<learning_rate>
+NUM_TRAIN_EPOCHS=<train_epochs>
+
+torchrun \
+    --nproc_per_node $NUM_GPUS \
+    -m train.finetune \
+    --model_name_or_path $MODEL_NAME_OR_PATH \
+    --train_dataset_name_or_path $DATA_PATH \
+    --output_dir $SAVE_PATH \
+    --per_device_train_batch_size $BATCH_SIZE_PER_GPU \
+    --per_device_eval_batch_size $BATCH_SIZE_PER_GPU \
+    --gradient_accumulation_steps $GRADIENT_ACC_STEPS \
+    --evaluation_strategy "no" \
+    --save_strategy "no" \
+    --save_total_limit 1 \
+    --preprocessing_num_workers $PREPROCESSING_NUM_WORKERS \
+    --ddp_timeout 14400 \
+    --max_seq_length $MAX_SEQ_LENGTH \
+    --learning_rate $LEARNING_RATE \
+    --lr_scheduler_type linear \
+    --warmup_ratio 0.03 \
+    --num_train_epochs $NUM_TRAIN_EPOCHS \
+    --logging_steps 1 \
+    --report_to "tensorboard" \
+    --gradient_checkpointing True \
+    --deepspeed train/configs/stage3_no_offloading_bf16.json \
+    --overwrite_output_dir \
+    --bf16 True
+```
+
 ## Citation
 Please cite the paper if you refer to our model, code, data or paper.
 

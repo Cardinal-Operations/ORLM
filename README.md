@@ -7,6 +7,8 @@
 This project explores training open-source LLMs for optimization modeling. We identify four critical requirements for the training dataset of OR LLMs, design and implement OR-Instruct, a semi-automated process for creating synthetic data tailored to specific requirements. We also introduce the IndustryOR benchmark, the first industrial benchmark for testing LLMs on solving real-world OR problems. We apply the data from OR-Instruct to various open-source LLMs of 7b size (termed as ORLMs), resulting in a significantly improved capability for optimization modeling. [Read our paper here](https://arxiv.org/abs/2405.17743).
 
 ## News
+- 🔥 Thrilled to annouce that ORLM has been accepted by Operations Research.
+- 🔥 We update the IndustryOR Benchmark! [Check it out](https://huggingface.co/datasets/CardinalOperations/IndustryOR).
 - 🔥 We're excited to offer an [Interactive DEMO](https://huggingface.co/spaces/tangzhy/ORLM) of the ORLM-LLaMA-3-8B model, thanks to donations of NVIDIA-A100 from [Huggingface ZeroGPU](https://huggingface.co/zero-gpu-explorers).
 - 🔥 We released a sample of the OR-Instruct Data for training LLMs! [View it here](https://huggingface.co/datasets/CardinalOperations/OR-Instruct-Data-3K).
 - 🔥 Our [**ORLM-LLaMA-3-8B**](https://huggingface.co/CardinalOperations/ORLM-LLaMA-3-8B) model achieves SOTA on the [NL4OPT](https://huggingface.co/datasets/CardinalOperations/NL4OPT), [MAMO](https://huggingface.co/datasets/CardinalOperations/MAMO), and [IndustryOR](https://huggingface.co/datasets/CardinalOperations/IndustryOR) benchmarks!

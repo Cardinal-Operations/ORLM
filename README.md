@@ -140,10 +140,11 @@ torchrun \
 Please cite the paper if you refer to our model, code, data or paper.
 
 ```
-@article{tang2024orlm,
-  title={ORLM: Training Large Language Models for Optimization Modeling},
-  author={Tang, Zhengyang and Huang, Chenyu and Zheng, Xin and Hu, Shixi and Wang, Zizhuo and Ge, Dongdong and Wang, Benyou},
-  journal={arXiv preprint arXiv:2405.17743},
+@article{huang2024orlm,
+  title={ORLM: A Customizable Framework in Training Large Models for Automated Optimization Modeling},
+  author={Huang, Chenyu and Tang, Zhengyang and Ge, Dongdong and Hu, Shixi and Jiang, Ruoqing and Wang, Benyou and Wang, Zizhuo and Zheng, Xin},
+  journal={arXiv e-prints},
+  pages={arXiv--2405},
   year={2024}
 }
 ```
